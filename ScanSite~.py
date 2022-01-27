@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import urllib.request
 import winsound
 import docx
+import re
 # import docx
 
 # import time
@@ -469,38 +470,39 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
             if i[6].find(listOfClasses[int(choiceClass)-1])!=-1 or i[7].find(listOfClasses[int(choiceClass)-1])!=-1 or choiceClass==14:
                 font_size0=8
                 font_size1=8
+                chars_in_line=39
                 lenn=0
-                cur_String=1
+                cur_String=0
                 cur_String_len=0
                 for j in range(7,len(i)):
                     lenn=lenn+len(i[j].replace(" ",""))
                     pass
                 print(i[0]+" "+str(lenn))
                 big_text=False
-                if lenn>2000:
-                    font_size0=6
-                    font_size1=6
-                    big_text=True
-                elif lenn>1800:
-                    big_text=True
-                elif lenn>1460:
-                    font_size0=5
-                    font_size1=5
-                elif lenn>1264:
-                    font_size0=5
-                    font_size1=6
-                # elif lenn>935:
+                # if lenn>2000:
                 #     font_size0=6
                 #     font_size1=6
-                elif lenn>834:
-                    font_size0=6
-                    font_size1=6
-                elif lenn>583:
-                    font_size0=7
-                    font_size1=7
-                elif lenn>536:
-                    font_size0=7
-                    font_size1=8
+                #     big_text=True
+                # elif lenn>1800:
+                #     big_text=True
+                # elif lenn>1460:
+                #     font_size0=5
+                #     font_size1=5
+                # elif lenn>1264:
+                #     font_size0=5
+                #     font_size1=6
+                # # elif lenn>935:
+                # #     font_size0=6
+                # #     font_size1=6
+                # elif lenn>834:
+                #     font_size0=6
+                #     font_size1=6
+                # elif lenn>583:
+                #     font_size0=7
+                #     font_size1=7
+                # elif lenn>536:
+                #     font_size0=7
+                #     font_size1=8
             
                 cell.paragraphs[0].paragraph_format.space_after=Mm(0)
                 cell.paragraphs[0].paragraph_format.line_spacing=1
@@ -519,6 +521,49 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 
                 # styles = doc.styles
                 # style=styles.add_style('Main1',WD_STYLE_TYPE.PARAGRAPH)
+                
+                # cur_run.bold = True
+                # paragraph.add_run('bold').bold = True
+                # par_style=_ParagraphStyle
+                correct=0
+                start_txt=9
+                # if i[7]=="???":
+                #     start_txt=8
+                # print(i[2])
+                correcting=True
+                while correcting:
+                    for cur_par in range(1,len(i)):
+                        if i[cur_par]!="???":
+                            cur_String+=1
+                            cur_String_len=0
+                            splitted=re.split(' ', i[cur_par])
+                            for xi in range(len(splitted)):
+                                    splitted[xi]=splitted[xi]+" "
+                                    # cur_run=paragraph.add_run(splitted[xi])
+                                    if cur_String_len+len(splitted[xi])>chars_in_line:
+                                        cur_String_len=len(splitted[xi])
+                                        cur_String+=1
+                                        # print(splitted[xi])
+                                        
+                                    else:
+                                        cur_String_len+=len(splitted[xi])
+                    if cur_String >65-5*font_size0 and font_size0!=5:
+                        font_size0-=1
+                        font_size1-=1
+                        if font_size0==7:
+                            chars_in_line=43
+                        elif font_size0==6:
+                            chars_in_line=50
+                        elif font_size0==5:
+                            chars_in_line=61
+                        print(cur_String)
+                        cur_String=0
+                        cur_String_len=0
+
+                    else:
+                        correcting=False
+                        print(cur_String)
+
                 paragraph = cell.add_paragraph('')
                 cell.paragraphs[1].paragraph_format.space_after=Mm(0)
                 cell.paragraphs[1].paragraph_format.line_spacing=1
@@ -527,30 +572,27 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 cur_run.font.name='TeXGyreCursor'
                 cur_run.font.size=Pt(font_size0)
                 cur_run.italic=True
-                # cur_run.bold = True
-                # paragraph.add_run('bold').bold = True
-                # par_style=_ParagraphStyle
-                correct=0
-                start_txt=9
-                # if i[7]=="???":
-                #     start_txt=8
-
                 # Пишем на карточку описание 
                 for cur_par in range(2,start_txt):
                     if i[cur_par]!="???":
-                        paragraph = cell.add_paragraph('')
-                        cell.paragraphs[cur_par-correct].paragraph_format.space_after=Mm(0)
-                        cell.paragraphs[cur_par-correct].paragraph_format.line_spacing=1
-                        cell.paragraphs[cur_par-correct].paragraph_format.left_indent=Mm(Main_Indent)
-                        cur_run_dvoetoch=i[cur_par].find(":")
-                        # if cur_run_dvoetoch!=-1:
-                        cur_run=paragraph.add_run(i[cur_par][0:cur_run_dvoetoch+1])
-                        cur_run.font.name='TeXGyreCursor'
-                        cur_run.bold=True
-                        cur_run.font.size=Pt(font_size0)
-                        cur_run=paragraph.add_run(i[cur_par][cur_run_dvoetoch+1:len(i[cur_par])])
-                        cur_run.font.name='TeXGyreCursor'
-                        cur_run.font.size=Pt(font_size0)
+                            # splitted=re.split(' ', i[cur_par])
+                            paragraph = cell.add_paragraph('')
+                            cell.paragraphs[cur_par-correct].paragraph_format.space_after=Mm(0)
+                            cell.paragraphs[cur_par-correct].paragraph_format.line_spacing=1
+                            cell.paragraphs[cur_par-correct].paragraph_format.left_indent=Mm(Main_Indent)
+                            cur_run_dvoetoch=i[cur_par].find(":")
+                            
+                            # if cur_run_dvoetoch!=-1:
+                            
+
+
+                            cur_run=paragraph.add_run(i[cur_par][0:cur_run_dvoetoch+1])
+                            cur_run.font.name='TeXGyreCursor'
+                            cur_run.bold=True
+                            cur_run.font.size=Pt(font_size0)
+                            cur_run=paragraph.add_run(i[cur_par][cur_run_dvoetoch+1:len(i[cur_par])])
+                            cur_run.font.name='TeXGyreCursor'
+                            cur_run.font.size=Pt(font_size0)
 
                     else:
                         # print(cur_par)
@@ -559,32 +601,38 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 # Пишем на карточку текст описания заклинания
                 if not big_text:
                     for cur_par in range(start_txt,len(i)):
-
-                            paragraph = cell.add_paragraph('')
-                            cell.paragraphs[cur_par-correct].paragraph_format.space_after=Mm(0)
-                            cell.paragraphs[cur_par-correct].paragraph_format.line_spacing=1
-                            cell.paragraphs[cur_par-correct].paragraph_format.left_indent=Mm(Main_Indent)
-                            cell.paragraphs[cur_par-correct].paragraph_format.first_line_indent=Mm(1)
+                        # splitted=i[cur_par].split()
+                        
+                        paragraph = cell.add_paragraph('')
+                        cell.paragraphs[cur_par-correct].paragraph_format.space_after=Mm(0)
+                        cell.paragraphs[cur_par-correct].paragraph_format.line_spacing=1
+                        cell.paragraphs[cur_par-correct].paragraph_format.left_indent=Mm(Main_Indent)
+                        cell.paragraphs[cur_par-correct].paragraph_format.first_line_indent=Mm(1)
+                        # print(splitted)
+                        # print()
+                        
                             
-                            if i[cur_par].find("На больших уровнях.")!=-1:
-                                # print("На больших уровнях.")
-                                cur_run=paragraph.add_run("На больших уровнях.")
-                                cur_run.font.name='TeXGyreCursor'
-                                cur_run.font.size=Pt(font_size1)
-                                cur_run.bold=True
-                                i[cur_par]=i[cur_par][i[cur_par].find("На больших уровнях.")+len("На больших уровнях."):len(i[cur_par])]
-                            if i[cur_par].find("Компонент авторских отчислений (А)")!=-1:
-                                # print("Авторские отчисления")
-                                cur_run=paragraph.add_run("Компонент авторских отчислений (А) ")
-                                cur_run.font.name='TeXGyreCursor'
-                                cur_run.font.size=Pt(font_size1)
-                                cur_run.italic=True
-                                cur_run.bold=True
-                                i[cur_par]=i[cur_par][i[cur_par].find("Компонент авторских отчислений (А)")+len("Компонент авторских отчислений (А)"):len(i[cur_par])]
-                            cur_run=paragraph.add_run(i[cur_par])
+                            
+                            
+                        if i[cur_par].find("На больших уровнях.")!=-1:
+                            # print("На больших уровнях.")
+                            cur_run=paragraph.add_run("На больших уровнях.")
                             cur_run.font.name='TeXGyreCursor'
-
                             cur_run.font.size=Pt(font_size1)
+                            cur_run.bold=True
+                            i[cur_par]=i[cur_par][i[cur_par].find("На больших уровнях.")+len("На больших уровнях."):len(i[cur_par])]
+                        if i[cur_par].find("Компонент авторских отчислений (А)")!=-1:
+                            # print("Авторские отчисления")
+                            cur_run=paragraph.add_run("Компонент авторских отчислений (А) ")
+                            cur_run.font.name='TeXGyreCursor'
+                            cur_run.font.size=Pt(font_size1)
+                            cur_run.italic=True
+                            cur_run.bold=True
+                            i[cur_par]=i[cur_par][i[cur_par].find("Компонент авторских отчислений (А)")+len("Компонент авторских отчислений (А)"):len(i[cur_par])]
+                        
+                        cur_run=paragraph.add_run(i[cur_par])
+                        cur_run.font.name='TeXGyreCursor'
+                        cur_run.font.size=Pt(font_size1)
                 else:
                     
                     lenn=0
@@ -623,7 +671,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 cell= table0.cell(row+3, 3-column)
                 # cell.paragraphs[0].paragraph_format.right_indent=Mm(Main_Indent)
                 # cell.paragraphs[0].paragraph_format.left_indent=Mm(8)
-
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 # Если есть большой текст, то вторая сторона для продолжения текста
                 if big_text:
                     big_text=False
@@ -664,6 +712,8 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                         paragraph = cell.add_paragraph('')
                     cell.paragraphs[0].paragraph_format.space_before=Mm(1)
                     pass
+
+                # Иначе большими буквами название заклинания, круг и классы
                 else:        
                     
                     cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -673,7 +723,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                     txt=i[0]
                     txt=txt[0:txt.find("[")-1]
                     cur_run=cell.paragraphs[0].add_run(txt)
-                    cur_run.font.name='TeXGyreCursor'
+                    # cur_run.font.name='TeXGyreCursor'
                     cur_run.font.size=Pt(16)
                     cur_run.bold=True
                     paragraph = cell.add_paragraph('')
@@ -682,11 +732,11 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     if listOfLvl==0 or listOfLvl=="Заговор":
                         cur_run=paragraph.add_run("Заговор")
-                        cur_run.font.name='TeXGyreCursor'
+                        # cur_run.font.name='TeXGyreCursor'
                     else:
 
                         cur_run=paragraph.add_run(str(listOfLvl) + " круг")
-                        cur_run.font.name='TeXGyreCursor'
+                        # cur_run.font.name='TeXGyreCursor'
                     cur_run.font.size=Pt(13)
                     txt=i[6]
                     txt=txt[txt.find(":")+2:len(txt)]
@@ -703,7 +753,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                         # paragraph = cell.add_paragraph('')
                         # paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         cur_run=paragraph.add_run(", "+txt)
-                        cur_run.font.name='TeXGyreCursor'
+                        # cur_run.font.name='TeXGyreCursor'
                         cur_run.font.size=Pt(13)
                     # cur_run.font.all_caps=True
 
