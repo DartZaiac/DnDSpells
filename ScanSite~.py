@@ -17,6 +17,7 @@ from docx.enum.table import WD_ROW_HEIGHT,WD_ALIGN_VERTICAL
 from docx.enum.section import WD_ORIENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.table import _Cell
 
 
 # from docx.font.highlight_color import WD_COLOR_INDEX 
@@ -68,44 +69,33 @@ def add_row(table0,t):
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
         cur_row.height=Inches(10/25.4*0.05)
-# def set_cell_border(cell: _Cell, **kwargs):
-#     """
-#     Set cell`s border
-#     Usage:
+def set_cell_border(cell: _Cell, **kwargs):
+    
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
 
-#     set_cell_border(
-#         cell,
-#         top={"sz": 12, "val": "single", "color": "#FF0000", "space": "0"},
-#         bottom={"sz": 12, "color": "#00FF00", "val": "single"},
-#         start={"sz": 24, "val": "dashed", "shadow": "true"},
-#         end={"sz": 12, "val": "dashed"},
-#     )
-#     """
-#     tc = cell._tc
-#     tcPr = tc.get_or_add_tcPr()
+    # check for tag existnace, if none found, then create one
+    tcBorders = tcPr.first_child_found_in("w:tcBorders")
+    if tcBorders is None:
+        tcBorders = OxmlElement('w:tcBorders')
+        tcPr.append(tcBorders)
 
-#     # check for tag existnace, if none found, then create one
-#     tcBorders = tcPr.first_child_found_in("w:tcBorders")
-#     if tcBorders is None:
-#         tcBorders = OxmlElement('w:tcBorders')
-#         tcPr.append(tcBorders)
+    # list over all available tags
+    for edge in ('start', 'top', 'end', 'bottom', 'insideH', 'insideV','left','right'):
+        edge_data = kwargs.get(edge)
+        if edge_data:
+            tag = 'w:{}'.format(edge)
 
-#     # list over all available tags
-#     for edge in ('start', 'top', 'end', 'bottom', 'insideH', 'insideV'):
-#         edge_data = kwargs.get(edge)
-#         if edge_data:
-#             tag = 'w:{}'.format(edge)
+            # check for tag existnace, if none found, then create one
+            element = tcBorders.find(qn(tag))
+            if element is None:
+                element = OxmlElement(tag)
+                tcBorders.append(element)
 
-#             # check for tag existnace, if none found, then create one
-#             element = tcBorders.find(qn(tag))
-#             if element is None:
-#                 element = OxmlElement(tag)
-#                 tcBorders.append(element)
-
-#             # looks like order of attributes is important
-#             for key in ["sz", "val", "color", "space", "shadow"]:
-#                 if key in edge_data:
-#                     element.set(qn('w:{}'.format(key)), str(edge_data[key]))
+            # looks like order of attributes is important
+            for key in ["sz", "val", "color", "space", "shadow"]:
+                if key in edge_data:
+                    element.set(qn('w:{}'.format(key)), str(edge_data[key]))
         
 # httml='http://www.python.org/'
 
@@ -308,15 +298,18 @@ else:
     print()
 winsound.Beep(500, 200)
 # print(listOfSpels)
-listOfClasses=['Бард','Варвар','Воин','Волшебник','Друид','Жрец','Изобретатель','Колдун','Монах','Паладин','Плут','Следопыт','Чародей','Все классы','','Настройка']
+listOfClasses=['Бард','Варвар','Воин','Волшебник','Друид','Жрец','Изобретатель','Колдун','Монах','Паладин','Плут','Следопыт','Чародей','Все классы','Настройка']
 fChoice=True
 fFlagChoice=0
+Main_Indent=3
 while fChoice:
+    choiceClass=15
+    # while choiceClass>14:
     fChoice=not fChoice
     for i in range (0,len(listOfClasses)):
         print(str(i+1)+". "+listOfClasses[i])
-    # choiceClass=1
-    choiceClass=int(input("Выберите класс:"))
+
+    choiceClass=int(input("Выберите класс: "))
     
     if choiceClass==1: # 1. Бард
 
@@ -358,13 +351,19 @@ while fChoice:
         pass
     elif choiceClass==13:# 13. Чародей
         pass
-    elif choiceClass==14:# 13. Все классы
+    elif choiceClass==14:# 14. Все классы
         pass
+    elif choiceClass==15:# 15. Настройки
+        print("Настройка левой границы")
+        Main_Indent=int(input("Размеры левого отступа(мм): "))
+        # print(Main_Indent+'мм')
+        fChoice=True
+        pass        
     else:
         print("Нет такого класса")
         fChoice=True
-Main_Indent=13
-Main_Indent=3
+# Main_Indent=13
+# Main_Indent=3
 for i in range (0,len(listOfClasses)):
             listOfClasses[i]=listOfClasses[i].lower()
 listOfLvl=-1
@@ -442,29 +441,15 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
             column=t%4
             hdr_cells = table0.rows[row].cells
             cell = table0.cell(row, column)
-            # tcPr = cell._tc # get tcPr element, in which we can define style of borders
-            # tcBorders = OxmlElement('w:tcBorders')
-            # top = OxmlElement('w:top')
-            # top.set(qn('w:val'), 'nil')
-            
-            # left = OxmlElement('w:left')
-            # left.set(qn('w:val'), 'nil')
-            
-            # bottom = OxmlElement('w:bottom')
-            # bottom.set(qn('w:val'), 'nil')
-            # bottom.set(qn('w:sz'), '4')
-            # bottom.set(qn('w:space'), '0')
-            # bottom.set(qn('w:color'), 'auto')
+            set_cell_border(
+                cell,
+                left={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+                right={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+                top={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+                bottom={"sz": 1, "val": "single", "color": "#000000", "space": "0"}
 
-            # right = OxmlElement('w:right')
-            # right.set(qn('w:val'), 'nil')
-
-            # tcBorders.append(top)
-            # tcBorders.append(left)
-            # tcBorders.append(bottom)
-            # tcBorders.append(right)
-            # tcPr.append(tcBorders)
-            # cell.outline=True
+            )
+            
             if i[6].find(listOfClasses[3])!=-1 and choiceClass==3 and fFlagChoice==1 :#Мистический рыцарь and (i[1].find('воплощен')!=-1 or i[1].find('огражден')!=-1)
                 choiceClass=4
             if i[6].find(listOfClasses[int(choiceClass)-1])!=-1 or i[7].find(listOfClasses[int(choiceClass)-1])!=-1 or choiceClass==14:
@@ -490,6 +475,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 #     font_size1=5
                 # elif lenn>1264:
                 #     font_size0=5
+                
                 #     font_size1=6
                 # # elif lenn>935:
                 # #     font_size0=6
