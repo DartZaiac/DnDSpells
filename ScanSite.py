@@ -54,10 +54,10 @@ def add_row(table0,t):
         # print("add 5 rows")
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
-        cur_row.height=Inches(10/25.4*19.8/2)
+        cur_row.height=Inches(10/25.4*intTableHeight/2)
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
-        cur_row.height=Inches(10/25.4*19.8/2)
+        cur_row.height=Inches(10/25.4*intTableHeight/2)
 
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
@@ -65,10 +65,10 @@ def add_row(table0,t):
 
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
-        cur_row.height=Inches(10/25.4*20/2)
+        cur_row.height=Inches(10/25.4*(intTableHeight+0.2)/2)
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
-        cur_row.height=Inches(10/25.4*20/2)
+        cur_row.height=Inches(10/25.4*(intTableHeight+0.2)/2)
 
         cur_row= table0.add_row()
         cur_row.height_rule = WD_ROW_HEIGHT.EXACTLY
@@ -124,10 +124,18 @@ def jump_to_cell(cell):
             cell.paragraphs[cur_par].paragraph_format.first_line_indent=Mm(1)
         # if cell.paragraphs[cur_par].text.find(":")
         if cell.paragraphs[cur_par].text.find("На больших уровнях")!=-1:
-            for ab in range(0,len(cell.paragraphs[cur_par].runs)):
-                cell.paragraphs[cur_par].runs[ab].bold=True
-                if cell.paragraphs[cur_par].runs[ab].text.find("уровнях")!=-1:
-                    break
+            # print("На больших уровнях1")
+            cell.paragraphs[cur_par].add_run('')
+            for ab in range (len(cell.paragraphs[cur_par].runs)-1,0,-1):
+                cell.paragraphs[cur_par].runs[ab]=cell.paragraphs[cur_par].runs[ab-1]
+            cell.paragraphs[cur_par].runs[0].text="На больших уровнях."
+            cell.paragraphs[cur_par].runs[0].font.size=Pt(font_size0)
+            cell.paragraphs[cur_par].runs[0].bold=True
+            pass
+            # for ab in range(0,len(cell.paragraphs[cur_par].runs)):
+            #     cell.paragraphs[cur_par].runs[ab].bold=True
+            #     if cell.paragraphs[cur_par].runs[ab].text.find("уровнях")!=-1:
+            #         break
         if cell.paragraphs[cur_par].text.find("Компонент авторских отчислений ")!=-1:
             for ab in range(0,len(cell.paragraphs[cur_par].runs)):
                 cell.paragraphs[cur_par].runs[ab].bold=True
@@ -152,10 +160,20 @@ def jump_to_cell(cell):
 
     return cell
 # httml='http://www.python.org/'
-# list_3_13_chars_in_line=[[38,44,51,62],[38,43,51,61],[37,42,50,60],[37,42,49,59],[36,41,48,58],
-# [35,41,47,57],[35,40,47,56],[34,39,46,55],[34,38,45,54],[33,38,44,53],[31,37,42,52]]
-list_3_13_chars_in_line=[[50,58,64,77],[49,57,63,76],[48,56,62,75],[47,55,61,74],[46,54,60,73],
-[45,53,59,72],[44,52,58,71],[43,51,57,70],[42,50,56,69],[41,49,55,68],[40,42,54,67]]
+
+# Ширина на 1 символ
+# Ширина 8   67.3/42= 1.6 mm = 0.16 cm  высота 3.3 mm = 0.33 cm = (8*5-7)/100
+# Ширина 7   58.8/42= 1.4 mm = 0.14 cm  высота 3.3 mm = 0.28 cm = (7*5-7)/100
+# Ширина 6   50.4/42= 1.2 mm = 0.12 cm  высота 3.3 mm = 0.23 cm = (6*5-7)/100
+# Ширина 5   42.0/42= 1   mm = 0.10 cm  высота 3.3 mm = 0.18 cm = (5*5-7)/100
+
+columns = 4
+
+int_Otstup=0.65 # размер полей
+intTableHeight=19.6  # cm высота места для поля по вертикали
+intTableWidth=28.3/columns # cm высота места для поля по горизонтали
+
+
 # Страница со списком заклинаний 
 httml='https://dungeon.su/spells/'
 with urllib.request.urlopen(httml) as f:
@@ -173,22 +191,34 @@ with urllib.request.urlopen(httml) as f:
 listOfSpels=[[]]
 kolOfSpels=len(listOfSitesOfSpells)
 # kolOfSpels=10
+
+options=['3']
 i=0
-# if 1:
+# Открываем options.txt в котором хранятся настройки
+try:
+    # Открываем файл, записываем в оперативку все заклы
+    f=open('options.txt','r',encoding='utf-8')
+    for line in f:
+        options[i]=line
+        i+=1
+    f.close()
+except:
+    print("No option file")
+    f=open('options.txt','w',encoding='utf-8')
+    f.close()
+Main_Indent=int(options[0])
+print("Левый отступ равен "+str(Main_Indent))
 
 # Открываем listOfSpels.txt в котором хранятся заклы, разделённые !!!
 try:
     # Открываем файл, записываем в оперативку все заклы
     listOfSpels=open_list(listOfSpels)
-    
-    # print(listOfSpels)
-    # print(len(listOfSpels))
-# except Exception:
-    # print(Exception)
 except:
     print("No file")
     f=open('listOfSpels.txt','w',encoding='utf-8')
     f.close()
+
+
 
 # Убираем пустые строки в конце
 if len(listOfSpels)!=0: 
@@ -359,7 +389,8 @@ winsound.Beep(500, 200)
 listOfClasses=['Бард','Варвар','Воин','Волшебник','Друид','Жрец','Изобретатель','Колдун','Монах','Паладин','Плут','Следопыт','Чародей','Все классы','Настройка']
 fChoice=True
 fFlagChoice=0
-Main_Indent=3
+# Main_Indent=3
+TitleCard=[['','',''],['','',''],['','',''],['','',''],['','',''],['','',''],['','',''],['','',''],['','',''],['','','']]
 while fChoice:
     choiceClass=15
     # while choiceClass>14:
@@ -382,11 +413,34 @@ while fChoice:
         pass
     elif choiceClass==4:# 4. Волшебник
 
+        TitleCard= [['Волшебник','Заговоры','Молния спрыгнула с руки волшебника и ничего не ожидающий воин в латных доспехах, который подбежал к нему получил сильнейший удар током.'],
+                    ['Волшебник', '1 круг',''],
+                    ['Волшебник','2 круг',''],
+                    ['Волшебник','3 круг',''],
+                    ['Волшебник', '4 круг',''],	
+                    ['Волшебник', '5 круг','' ],
+                    ['Волшебник','6 круг',''],
+                    ['Волшебник','7 круг',''],
+                    ['Волшебник','8 круг',''],
+                    ['Волшебник','9 круг','']]
         pass
     elif choiceClass==5:# 5. Друид
 
         pass
     elif choiceClass==6:# 6. Жрец
+        # Font Zapf ChanceC
+        # 36
+        # 8
+        TitleCard= [['Жрец','Заговоры','Что мы говорим смерти? Не сегодня – сказал жрец, накладывая на очередного воина заоговор «Уход за умирающим».'],
+                    ['Жрец','1 круг',  'Услышь мое слово и встань! Твой бой еще не окончен!'],
+                    ['Жрец','2 круг',  'О Тор-Громовержец, дай мне силу Мьельнира, твоего друга и верного боевого товарища, дабы мы могли отправить больше горячих душ на пир в Вальхаллу!'],
+                    ['Жрец','3 круг',  'Вы посмели окружить меня, друзей моих и всех людей, что мы поклялись защищать?/nЭто не вы заперли нас. Это мы дадим духам отмщения упиться вашей крови!'],
+                    ['Жрец','4 круг',  'И помни, что твоя первая смерть на арене – это всего лишь маленькая смерть. Встань и заверши бой в нашу пользу.'],	
+                    ['Жрец','5 круг',  'С неба обрушился невероятно яркий луч. Ударив прямо в лича он моментально испепелил его одежды, а скелеты-прислужники испарились вовсе. '],
+                    ['Жрец','6 круг',  'А теперь, дамы и господа, Я предлагаю обняться и смотаться нафиг из этого логова дракона в святилище моего бога!!!'],
+                    ['Жрец','7 круг',  '- Нам точно надо тратить этот бриллиант?/n- Да./n- Но ведь я чуть не умер , доставая его!/n- Ты страдал не зря./n- Но…/n- Помолчи и не мешай. О Шесну, великая воительница, победившая дракона Андуина. Драконья угроза снова нависла над этими землями и я прошук тебя… ВОССТАНЬ!'],
+                    ['Жрец','8 круг',  'Встань, страх преодолей, встань, в полный рост, встань, на земле своей и достань рукой до звезд.'],
+                    ['Жрец','9 круг',  'Латандер, да дарует сила твоя исцеление страждущим воинам, что сражаются за дело твоё светлое.']]
 
         pass
     elif choiceClass==7:# 7. Изобретатель
@@ -413,6 +467,7 @@ while fChoice:
         pass
     elif choiceClass==15:# 15. Настройки
         print("Настройка левой границы")
+
         Main_Indent=int(input("Размеры левого отступа(мм): "))
         if Main_Indent<3:
             Main_Indent=3
@@ -420,6 +475,7 @@ while fChoice:
         elif Main_Indent>13:
             Main_Indent=13
             print("Размеры левого отступа установлен на 13")
+        
         # print(Main_Indent+'мм')
         fChoice=True
         pass        
@@ -428,6 +484,10 @@ while fChoice:
         fChoice=True
 # Main_Indent=13
 # Main_Indent=3
+
+f=open('options.txt','w',encoding='utf-8')
+f.write(str(Main_Indent) + '\n')
+f.close()
 
 for i in range (0,len(listOfClasses)):
             listOfClasses[i]=listOfClasses[i].lower()
@@ -460,8 +520,8 @@ section.orientation = 1
 section.page_width =Mm(297)
 # section.page_height = Inches(10/25.4*21)
 section.page_height = Mm(210) 
-section.top_margin=Mm(5)
-section.bottom_margin=Mm(5)
+section.top_margin=Mm(6)
+section.bottom_margin=Mm(6)
 section.left_margin = Mm(7)
 section.right_margin = Mm(7)
 
@@ -477,22 +537,23 @@ hdr_cells = table0.rows[0].cells
 table0.rows[0].height_rule = WD_ROW_HEIGHT.EXACTLY
 table0.rows[0].height=Inches(10/25.4*0.1)
 table0.rows[1].height_rule = WD_ROW_HEIGHT.EXACTLY
-table0.rows[1].height=Inches(10/25.4*19.8/2)
+table0.rows[1].height=Inches(10/25.4*(intTableHeight)/2)
 table0.rows[2].height_rule = WD_ROW_HEIGHT.EXACTLY
-table0.rows[2].height=Inches(10/25.4*19.8/2)
+table0.rows[2].height=Inches(10/25.4*(intTableHeight)/2)
 table0.rows[3].height_rule = WD_ROW_HEIGHT.EXACTLY
 table0.rows[3].height=Inches(10/25.4*0.05)
 table0.rows[4].height_rule = WD_ROW_HEIGHT.EXACTLY
-table0.rows[4].height=Inches(10/25.4*20/2)
+table0.rows[4].height=Inches(10/25.4*(intTableHeight+0.2)/2)
 table0.rows[5].height_rule = WD_ROW_HEIGHT.EXACTLY
-table0.rows[5].height=Inches(10/25.4*20/2)
+table0.rows[5].height=Inches(10/25.4*(intTableHeight+0.2)/2)
 table0.rows[6].height_rule = WD_ROW_HEIGHT.EXACTLY
 table0.rows[6].height=Inches(10/25.4*0.05)
 
-hdr_cells[0].width=Inches(10/25.4*28.3/4)
-hdr_cells[1].width=Inches(10/25.4*28.3/4)
-hdr_cells[2].width=Inches(10/25.4*28.3/4)
-hdr_cells[3].width=Inches(10/25.4*28.3/4)
+for columns_w in range(columns):
+    hdr_cells[columns_w].width=Inches(10/25.4*intTableWidth)
+# hdr_cells[1].width=Inches(10/25.4*intTableWidth)
+# hdr_cells[2].width=Inches(10/25.4*intTableWidth)
+# hdr_cells[3].width=Inches(10/25.4*intTableWidth)
 t=0
 row=0
 column=0
@@ -500,6 +561,53 @@ back_name=listOfClasses[choiceClass-1]
 print (back_name)
 
 for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
+    row=(t//8*6)+t//4%2+1
+    column=t%4
+    hdr_cells = table0.rows[row].cells
+    cell = table0.cell(row, column)
+    set_cell_border(
+        cell,
+        left={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+        right={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+        top={"sz": 1, "val": "single", "color": "#000000", "space": "0"},
+        bottom={"sz": 1, "val": "single", "color": "#000000", "space": "0"}
+
+    )
+    # TitleCard
+    if TitleCard[listOfLvl][0]!='':
+        cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        cell.paragraphs[0].paragraph_format.space_after=Mm(0)
+        cell.paragraphs[0].paragraph_format.line_spacing=1
+        cell.paragraphs[0].paragraph_format.left_indent=Mm(Main_Indent)
+        cell.paragraphs[0].paragraph_format.space_before=Mm(1)
+        cell.paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+        cur_run=cell.paragraphs[-1].add_run(TitleCard[listOfLvl][0])
+        cur_run.font.name='Cambria (Body)'
+        cur_run.bold=True
+        cur_run.font.size=Pt(26)
+
+        paragraph = cell.add_paragraph('')
+        cell.paragraphs[1].paragraph_format.space_after=Mm(0)
+        cell.paragraphs[1].paragraph_format.line_spacing=1
+        cell.paragraphs[1].paragraph_format.left_indent=Mm(Main_Indent)
+        cell.paragraphs[1].paragraph_format.space_before=Mm(1)
+        cell.paragraphs[1].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+        cur_run=paragraph.add_run(TitleCard[listOfLvl][1])
+        cur_run.font.size=Pt(26)
+
+        cell= table0.cell(row+3, 3-column)
+        cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        cell.paragraphs[0].paragraph_format.space_after=Mm(0)
+        cell.paragraphs[0].paragraph_format.line_spacing=1
+        cell.paragraphs[0].paragraph_format.left_indent=Mm(Main_Indent)
+        cell.paragraphs[0].paragraph_format.space_before=Mm(1)
+        cell.paragraphs[0].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.RIGHT
+        cur_run=cell.paragraphs[-1].add_run(TitleCard[listOfLvl][2])
+        cur_run.font.name='Cambria (Body)'
+        cur_run.font.size=Pt(10)
+
+        t=t+1
+        add_row(table0,t)
     if listOfLvl==0:
         listOfLvl="Заговор"
     for i in listOfSpels:
@@ -528,7 +636,8 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
             if i[6].find(listOfClasses[int(choiceClass)-1])!=-1 or i[7].find(listOfClasses[int(choiceClass)-1])!=-1 or choiceClass==14:
                 font_size0=8
                 font_size1=8
-                chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
+
+                chars_in_line=(intTableWidth-Main_Indent/10)/(font_size0*2/100)
                 lenn=0
                 cur_String=0
                 cur_String_len=0
@@ -551,15 +660,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                 cur_run.font.size=Pt(8)
                 cur_run.font.color.rgb=RGBColor(255,255,255)
                 cur_run.font.highlight_color = WD_COLOR_INDEX.BLACK
-                # cell.add_run('&&&')
-
                 
-                # styles = doc.styles
-                # style=styles.add_style('Main1',WD_STYLE_TYPE.PARAGRAPH)
-                
-                # cur_run.bold = True
-                # paragraph.add_run('bold').bold = True
-                # par_style=_ParagraphStyle
                 correct=0
                 start_txt=9
                 # if i[7]=="???":
@@ -582,17 +683,19 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                                     
                                 else:
                                     cur_String_len+=len(splitted[xi])
-                    if cur_String >70-5*font_size0 and font_size0>=5:
+                    # if cur_String >67-5*font_size0 and font_size0>=5:
+                    # print("chars_in_line = "+str(chars_in_line))
+                    # print(intTableHeight)
+                    # print(font_size0)
+                    # print(str((intTableHeight/2-0.7)/((font_size0*5-7)/100)))
+                    # print(cur_String)
+                    if cur_String > (intTableHeight/2-int_Otstup)/((font_size0*5-7)/100) and font_size0>=5:
+                         
                         font_size0-=1
                         font_size1-=1
                         # if font_size0==7:
                         if font_size0>=5:
-                            chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
-                        # elif font_size0==6:
-                        #     chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
-                        # elif font_size0==5:
-                        #     chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
-                        # print(cur_String)
+                            chars_in_line=(intTableWidth-Main_Indent/10)/(font_size0*2/100)
                         cur_String=0
                         cur_String_len=0
 
@@ -659,13 +762,19 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                             
                             
                         if i[cur_par].find("На больших уровнях")!=-1:
-                            # print("На больших уровнях")
+                            # print("На больших уровнях2")
                             cur_run=paragraph.add_run("На больших уровнях")
                             # cur_run.font.name='TeXGyreCursor'; cur_run.font.name='Cambria (Body)'
+
+                            # for ab in range(len(paragraph.runs),0,-1):
+                            #     paragraph.runs[ab]=paragraph.runs[ab-1]
+                        
                             cur_run.font.name='Cambria (Body)'
                             cur_run.font.size=Pt(font_size1)
                             cur_run.bold=True
                             i[cur_par]=i[cur_par][i[cur_par].find("На больших уровнях")+len("На больших уровнях"):len(i[cur_par])]
+                            # print(i[cur_par])
+
                         if i[cur_par].find("Компонент авторских отчислений (А)")!=-1:
                             # print("Авторские отчисления")
                             cur_run=paragraph.add_run("Компонент авторских отчислений (А) ")
@@ -680,11 +789,12 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                         # cur_run.font.name='TeXGyreCursor'; cur_run.font.name='Cambria (Body)' 
                         cur_run.font.name='Cambria (Body)'
                         cur_run.font.size=Pt(font_size1)
+                        cur_run.bold=False
                         for cur_par1 in range(1,len(cell.paragraphs)):
                             cell.paragraphs[cur_par1].paragraph_format.space_after=Mm(0)
                             cell.paragraphs[cur_par1].paragraph_format.line_spacing=1
                             cell.paragraphs[cur_par1].paragraph_format.left_indent=Mm(Main_Indent)
-                            if cell.paragraphs[cur_par1].text.find(":")<21 and cell.paragraphs[cur_par1].text.find(":")>-1 or cur_par1<4:
+                            if (cell.paragraphs[cur_par1].text.find(":")<21 and cell.paragraphs[cur_par1].text.find(":")>-1 or cur_par1<4) and cell.paragraphs[cur_par1].text.find("На больших уровнях")==-1:
                                 cell.paragraphs[cur_par1].paragraph_format.first_line_indent=Mm(0)
                                 a=cell.paragraphs[cur_par1].text.find(":")
                                 if a>-1:
@@ -699,15 +809,16 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
 
                 else:
                     # Пишем большой текст с учётом обеих сторон
-                    
-                    
                     # Вычисляем размер шрифта для большого текста
                     cur_String=0
                     cur_String_len=0
                     font_size1=1
                     print("Big Text!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    for font_size0 in range(8,4,-1) :
-                        chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
+                    font_size0=8
+                    
+                    while font_size0>4:
+                    # for font_size0 in range(8,4,-1) :
+                        chars_in_line=(intTableWidth-Main_Indent/10)/(font_size0*2/100)
                         for cur_par in range(1,len(i)):
                             if i[cur_par]!="???":
                                 cur_String+=1
@@ -723,23 +834,20 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                                             
                                         else:
                                             cur_String_len+=len(splitted[xi])
-                            if cur_String >(70-5*font_size0)*2 and font_size0>5:
-                                font_size0-=1
-                                font_size1-=1
-                                # if font_size0==7:
-                                
-                                # elif font_size0==6:
-                                #     chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
-                                # elif font_size0==5:
-                                #     chars_in_line=list_3_13_chars_in_line[Main_Indent-3][8-font_size0]
-                                # print(cur_String)
+                                            
+                            # if cur_String >(67-5*font_size0)*2 and font_size0>5:
+                        if cur_String >(intTableHeight/2-int_Otstup)/((font_size0*5-7)/100)*2 and font_size0>5:
                                 cur_String=0
                                 cur_String_len=0
-                            else:
+                                font_size0-=1
+                        else:
                                 font_size1=font_size0
                                 pass
-                            if  font_size1!=1:
-                                break
+                        #     if  font_size1!=1:
+                        #         break
+                        if  font_size1!=1:
+                                break    
+                        
                     font_size0=font_size1
                     print("Font = "+str(font_size0))
 
@@ -763,7 +871,9 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                         
                         if i[cur_par]!="???":
                             cur_String+=1
-                            if cur_String >(70-5*font_size0):
+                            if cur_String >(intTableHeight/2-int_Otstup)/((font_size0*5-7)/100):
+                            # if cur_String >(intTableHeight/2-0.05)/((font_size0*5-7)/100):
+                            # if cur_String >(67-5*font_size0):
                                 cell=jump_to_cell(cell)
                                 bSecondSide=True
                                 paragraph = cell.paragraphs[0] 
@@ -784,7 +894,7 @@ for listOfLvl in range (Spell_lvl_s,Spell_lvl_f):
                                 if cur_String_len+len(splitted[xi])>chars_in_line:
                                     cur_String_len=len(splitted[xi])
                                     cur_String+=1
-                                    if cur_String >(70-5*font_size0):
+                                    if cur_String >(intTableHeight/2-int_Otstup)/((font_size0*5-7)/100):
                                         # print(cur_String)
                                         # break
                                         cell=jump_to_cell(cell)
