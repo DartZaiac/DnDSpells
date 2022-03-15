@@ -1,11 +1,13 @@
+# pip install beautifulsoup4
+# pip install docx2pdf
+# pip install python-docx
+
 from bs4 import BeautifulSoup
 import urllib.request
 import winsound
 import docx
 import re
-# import docx
 
-# import time
 from docx import Document
 import datetime
 from docx.shared import Inches,Pt,Mm,RGBColor
@@ -19,9 +21,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.table import _Cell
 
-# import aspose.words as aw
 from docx2pdf import convert
-# pip install docx2pdf
 
 import os, ssl
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
