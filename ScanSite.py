@@ -250,6 +250,7 @@ try:
     listOfSpels=open_list(listOfSpels)
 except:
     print("No file")
+    print("База данных с заклинаниями отсутствует. Качаем заклинания с Dungeon.su и формируем БД. Это может занять несколько минут")
     f=open('listOfSpels.txt','w',encoding='utf-8')
     f.close()
 
@@ -561,10 +562,11 @@ if Spell_lvl_s!=10:
     while Spell_lvl_f<0 or Spell_lvl_f>9 and Spell_lvl_f<Spell_lvl_s:
         Spell_lvl_f=int(input("Уровень заклинаний, до которого будут создаваться карточки: "))
 # name_file =listOfClasses[int(choiceClass)-1]+" "+str(listOfLvl)+"_lvl "+ str(datetime.datetime.now().time())
-name_file =listOfClasses[int(choiceClass)-1]+" "+str(Spell_lvl_s)+"-"+str(Spell_lvl_f)+"_lvl"
-if listOfLvl==10:
+
+if Spell_lvl_s==10:
     Spell_lvl_s=0
-    Spell_lvl_f=10
+    Spell_lvl_f=9
+name_file =listOfClasses[int(choiceClass)-1]+" "+str(Spell_lvl_s)+"-"+str(Spell_lvl_f)+"_lvl"
 # else:
 #     Spell_lvl_s=listOfLvl
     # Spell_lvl_f=listOfLvl+1
