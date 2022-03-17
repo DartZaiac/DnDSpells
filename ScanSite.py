@@ -5,7 +5,6 @@
 
 from bs4 import BeautifulSoup
 import urllib.request
-# import winsound
 import docx
 import re
 
@@ -421,7 +420,7 @@ if len(listOfSpels)!=kolOfSpels:
 else:
     print("SAME!"+str(kolOfSpels))
     print()
-# winsound.Beep(500, 200)
+
 # print(listOfSpels)
 listOfClasses=['Бард','Варвар','Воин','Волшебник','Друид','Жрец','Изобретатель','Колдун','Монах','Паладин','Плут','Следопыт','Чародей','Все классы','Настройка']
 fChoice=True
