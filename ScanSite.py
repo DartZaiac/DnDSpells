@@ -421,7 +421,6 @@ if len(listOfSpels)!=kolOfSpels:
 else:
     print("SAME!"+str(kolOfSpels))
     print()
-
 # print(listOfSpels)
 listOfClasses=['Бард','Варвар','Воин','Волшебник','Друид','Жрец','Изобретатель','Колдун','Монах','Паладин','Плут','Следопыт','Чародей','Все классы','Настройка']
 fChoice=True
